@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define N 5
+
+int maze[N][N] = {
+    {0,0,1,0,0},
+    {1,0,1,0,1},
+    {0,0,0,0,0},
+    {0,1,1,1,0},
+    {0,0,0,1,0}
+};
+
+int visited[N][N], parent[N][N][2];
+int qx[100], qy[100], front = 0, rear = 0;
+
+int dx[4] = {1,-1,0,0};
+int dy[4] = {0,0,1,-1};
+
+void printPath(int ex, int ey) {
+    int x = ex, y = ey;
+    printf("\nShortest Path (reversed):\n");
+    while (!(parent[x][y][0] == -1 && parent[x][y][1] == -1)) {
+        printf("(%d,%d) ", x, y);
+        int px = parent[x][y][0];
+        int py = parent[x][y][1];
+        x = px; y = py;
+    }
+    printf("(S)\n");
+}
+
+void bfs(int sx, int sy, int ex, int ey) {
+    visited[sx][sy] = 1;
+    parent[sx][sy][0] = parent[sx][sy][1] = -1;
+    qx[rear] = sx; qy[rear++] = sy;
+
+    while (front < rear) {
+        int x = qx[front], y = qy[front]; front++;
+
+        if (x == ex && y == ey) {
+            printf("\nPath Found!\n");
+            printPath(ex, ey);
+            return;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i], ny = y + dy[i];
+
+            if (nx>=0 && nx<N && ny>=0 && ny<N && maze[nx][ny] == 0 && !visited[nx][ny]) {
+                visited[nx][ny] = 1;
+                parent[nx][ny][0] = x;
+                parent[nx][ny][1] = y;
+
+                qx[rear] = nx;
+                qy[rear++] = ny;
+            }
+        }
+    }
+    printf("\nNo Path Found!\n");
+}
+
+int main() {
+    int sx=0, sy=0, ex=4, ey=4;
+
+    printf("MAZE:\nS=Start, E=End\n\n");
+    for(int i=0;i<N;i++){
+        for(int j=0;j<N;j++){
+            if(i==sx && j==sy) printf("S ");
+            else if(i==ex && j==ey) printf("E ");
+            else printf("%d ", maze[i][j]);
+        }
+        printf("\n");
+    }
+
+    bfs(sx, sy, ex, ey);
+    return 0;
+}
