@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maze BFS Visualization</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  .grid { display: grid; gap: 2px; margin-top: 20px; }
+  .cell {
+    width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;
+    border: 1px solid #aaa; font-weight: bold;
+  }
+  .wall { background-color: black; color: white; }
+  .start { background-color: green; color: white; }
+  .end { background-color: red; color: white; }
+  .path { background-color: yellow; }
+</style>
+</head>
+<body>
+
+<h2>Maze BFS Visualization</h2>
+<button onclick="runBFS()">Run BFS</button>
+<div id="mazeContainer" class="grid"></div>
+
+<script>
+const N = 5;
+let maze = [
+  [0,0,1,0,0],
+  [1,0,1,0,1],
+  [0,0,0,0,0],
+  [0,1,1,1,0],
+  [0,0,0,1,0]
+];
+
+let start = [0,0], end = [4,4];
+
+function createGrid() {
+  const container = document.getElementById('mazeContainer');
+  container.style.gridTemplateColumns = `repeat(${N}, 40px)`;
+  container.innerHTML = '';
+  for(let i=0;i<N;i++){
+    for(let j=0;j<N;j++){
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      if(i==start[0] && j==start[1]) cell.classList.add('start');
+      else if(i==end[0] && j==end[1]) cell.classList.add('end');
+      else if(maze[i][j]==1) cell.classList.add('wall');
+      cell.id = `cell-${i}-${j}`;
+      container.appendChild(cell);
+    }
+  }
+}
+
+function runBFS() {
+  let visited = Array.from({length:N}, ()=>Array(N).fill(false));
+  let parent = Array.from({length:N}, ()=>Array.from({length:N}, ()=>[-1,-1]));
+  let q = [];
+  
+  q.push(start);
+  visited[start[0]][start[1]] = true;
+
+  while(q.length>0){
+    const [x,y] = q.shift();
+    if(x==end[0] && y==end[1]){
+      console.log("Path found!");
+      showPath(parent, end);
+      return;
+    }
+    let dx = [1,-1,0,0];
+    let dy = [0,0,1,-1];
+    for(let i=0;i<4;i++){
+      let nx = x + dx[i];
+      let ny = y + dy[i];
+      if(nx>=0 && nx<N && ny>=0 && ny<N && maze[nx][ny]==0 && !visited[nx][ny]){
+        visited[nx][ny] = true;
+        parent[nx][ny] = [x,y];
+        q.push([nx,ny]);
+      }
+    }
+  }
+  alert("No Path Found!");
+}
+
+function showPath(parent, end){
+  let [x,y] = end;
+  let path = [];
+  while(parent[x][y][0] != -1){
+    path.push([x,y]);
+    [x,y] = parent[x][y];
+  }
+  path.push(start); // include start
+
+  for(const [i,j] of path){
+    const cell = document.getElementById(`cell-${i}-${j}`);
+    if(!cell.classList.contains('start') && !cell.classList.contains('end')){
+      cell.classList.add('path');
+    }
+  }
+}
+
+createGrid();
+</script>
+
+</body>
+</html>
